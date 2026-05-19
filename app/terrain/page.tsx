@@ -292,15 +292,16 @@ export default function Terrain() {
     }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const recorder = new MediaRecorder(stream)
+      const mimeType = MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : ''
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {})
       audioChunksRef.current = []
       recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data)
       recorder.onstop = async () => {
         stream.getTracks().forEach(t => t.stop())
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/mp4' })
-        const file = new File([blob], `vocal_${Date.now()}.mp4`, { type: 'audio/mp4' })
+        const blob = new Blob(audioChunksRef.current, { type: mimeType || 'audio/mp4' })
+        const file = new File([blob], `vocal_${Date.now()}.${mimeType?.includes('mp4') ? 'mp4' : 'webm'}`, { type: 'audio/mp4' })
         setUploadingAudio(true)
-        const path = `${selectedClientId}/${sanitize(poste.nom)}_vocal_${Date.now()}.mp4`
+        const path = `${selectedClientId}/${sanitize(poste.nom)}_vocal_${Date.now()}.${mimeType?.includes('mp4') ? 'mp4' : 'webm'}`
         const { error: upErr } = await supabase.storage.from('medias').upload(path, file, { upsert: true })
         if (!upErr) {
           const { data: urlData } = supabase.storage.from('medias').getPublicUrl(path)
