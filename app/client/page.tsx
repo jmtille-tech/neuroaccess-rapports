@@ -338,7 +338,7 @@ export default function ClientPage() {
         {medias.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 0' }}>
             <p style={{ color: t.textMuted, fontSize: '14px', margin: '0 0 8px' }}>Aucun média pour l'instant.</p>
-            <p style={{ color: t.textMuted, fontSize: '12px', margin: 0, opacity: 0.6 }}>Photos et vidéos de vos diagnostics terrain apparaîtront ici.</p>
+            <p style={{ color: t.textMuted, fontSize: '12px', margin: 0, opacity: 0.6 }}>Photos, vidéos et notes vocales de vos diagnostics terrain apparaîtront ici.</p>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
@@ -347,14 +347,19 @@ export default function ClientPage() {
                 onClick={() => m.type === 'photo' && setLightbox(m.url)}>
                 {m.type === 'photo' ? (
                   <img src={m.url} alt={m.nom} style={{ width: '100%', height: '120px', objectFit: 'cover', display: 'block' }} />
+                ) : m.type === 'audio' ? (
+                  <div style={{ width: '100%', height: '120px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,149,0,0.08)', gap: '10px' }}>
+                    <span style={{ fontSize: '32px' }}>🎙️</span>
+                    <audio src={m.url} controls style={{ width: '90%' }} />
+                  </div>
                 ) : (
                   <video src={m.url} style={{ width: '100%', height: '120px', objectFit: 'cover', display: 'block' }} controls />
                 )}
                 <div style={{ padding: '8px 10px', background: t.card }}>
-                  <p style={{ color: t.textMuted, fontSize: '11px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nom}</p>
+                  <p style={{ color: t.textMuted, fontSize: '11px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.poste || m.nom}</p>
                 </div>
                 <span style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', borderRadius: '4px', padding: '2px 6px', fontSize: '10px', color: '#fff' }}>
-                  {m.type === 'photo' ? '📸' : '🎥'}
+                  {m.type === 'photo' ? '📸' : m.type === 'audio' ? '🎙️' : '🎥'}
                 </span>
               </div>
             ))}

@@ -297,10 +297,10 @@ export default function Terrain() {
       recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data)
       recorder.onstop = async () => {
         stream.getTracks().forEach(t => t.stop())
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
-        const file = new File([blob], `vocal_${Date.now()}.webm`, { type: 'audio/webm' })
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/mp4' })
+        const file = new File([blob], `vocal_${Date.now()}.mp4`, { type: 'audio/mp4' })
         setUploadingAudio(true)
-        const path = `${selectedClientId}/${sanitize(poste.nom)}_vocal_${Date.now()}.webm`
+        const path = `${selectedClientId}/${sanitize(poste.nom)}_vocal_${Date.now()}.mp4`
         const { error: upErr } = await supabase.storage.from('medias').upload(path, file, { upsert: true })
         if (!upErr) {
           const { data: urlData } = supabase.storage.from('medias').getPublicUrl(path)
