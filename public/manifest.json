@@ -1,0 +1,22 @@
+{
+  "name": "NeuroAccess — Rapports",
+  "short_name": "NeuroAccess",
+  "description": "Plateforme de diagnostic expérience visiteur",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1520",
+  "theme_color": "#0d1520",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/ben.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/ben.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
