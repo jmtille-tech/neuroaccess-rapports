@@ -30,37 +30,38 @@ Tu as effectué un diagnostic terrain et voici tes observations par poste :
  
 ${notesTexte}
  
-Sur la base de ces observations, génère un rapport structuré au format JSON strict (sans markdown, sans backticks, uniquement le JSON).
+Sur la base de ces observations, génère un rapport structuré au format JSON strict.
+IMPORTANT : réponds UNIQUEMENT avec le JSON brut, sans aucun texte avant ou après, sans markdown, sans backticks, sans explication. Commence directement par { et termine par }.
  
 Le JSON doit avoir exactement cette structure :
 {
   "executive_summary": {
-    "score_global": <nombre entre 0 et 10>,
-    "frictions": [<3 frictions majeures courtes>],
-    "opportunites": [<3 opportunités immédiates courtes>],
-    "insight": "<1 insight stratégique clé>"
+    "score_global": 7,
+    "frictions": ["friction 1", "friction 2", "friction 3"],
+    "opportunites": ["opportunité 1", "opportunité 2", "opportunité 3"],
+    "insight": "insight stratégique clé"
   },
   "parcours_scores": {
     "avant": [
-      {"label": "Accessibilité & signalétique externe", "score": <0-10>},
-      {"label": "Parking & arrivée", "score": <0-10>},
-      {"label": "Site web & réservation en ligne", "score": <0-10>}
+      {"label": "Accessibilité & signalétique externe", "score": 7},
+      {"label": "Parking & arrivée", "score": 6},
+      {"label": "Site web & réservation en ligne", "score": 5}
     ],
     "pendant": [
-      {"label": "Accueil & entrée", "score": <0-10>},
-      {"label": "Fluidité & orientation", "score": <0-10>},
-      {"label": "F&B — friction & perception prix", "score": <0-10>},
-      {"label": "Compréhension de l offre & prix", "score": <0-10>}
+      {"label": "Accueil & entrée", "score": 7},
+      {"label": "Fluidité & orientation", "score": 6},
+      {"label": "F&B — friction & perception prix", "score": 5},
+      {"label": "Compréhension de l offre & prix", "score": 6}
     ],
     "apres": [
-      {"label": "Sortie & dernière impression", "score": <0-10>},
-      {"label": "Fidélisation & recontact", "score": <0-10>}
+      {"label": "Sortie & dernière impression", "score": 6},
+      {"label": "Fidélisation & recontact", "score": 5}
     ]
   },
   "analyse_cognitive": {
-    "surcharge": [<3 observations de surcharge mentale>],
-    "doute": [<3 moments de doute observés>],
-    "waouh": [<3 moments waouh positifs>]
+    "surcharge": ["observation 1", "observation 2", "observation 3"],
+    "doute": ["moment 1", "moment 2", "moment 3"],
+    "waouh": ["moment positif 1", "moment positif 2", "moment positif 3"]
   },
   "neuro_impact": {
     "protocole": "EDA + HRV — parcours visiteur complet",
@@ -74,32 +75,32 @@ Le JSON doit avoir exactement cette structure :
     ]
   },
   "synthese": [
-    {"type": "critique", "texte": "<action>", "poste": "<poste>", "delai": "<délai>"},
-    {"type": "critique", "texte": "<action>", "poste": "<poste>", "delai": "<délai>"},
-    {"type": "quickwin", "texte": "<action>", "poste": "<poste>", "delai": "<délai>"},
-    {"type": "quickwin", "texte": "<action>", "poste": "<poste>", "delai": "<délai>"},
-    {"type": "optimisation", "texte": "<action>", "poste": "<poste>", "delai": "<délai>"},
-    {"type": "long_terme", "texte": "<action>", "poste": "<poste>", "delai": "<délai>"}
+    {"type": "critique", "texte": "action critique 1", "poste": "poste", "delai": "délai"},
+    {"type": "critique", "texte": "action critique 2", "poste": "poste", "delai": "délai"},
+    {"type": "quickwin", "texte": "quick win 1", "poste": "poste", "delai": "délai"},
+    {"type": "quickwin", "texte": "quick win 2", "poste": "poste", "delai": "délai"},
+    {"type": "optimisation", "texte": "optimisation", "poste": "poste", "delai": "délai"},
+    {"type": "long_terme", "texte": "action long terme", "poste": "poste", "delai": "délai"}
   ],
   "score_neuroplay": {
-    "accessibilite": <0-10>,
-    "fluidite": <0-10>,
-    "clarte": <0-10>,
-    "plaisir": <0-10>,
-    "performance_commerciale": <0-10>
+    "accessibilite": 7,
+    "fluidite": 6,
+    "clarte": 7,
+    "plaisir": 6,
+    "performance_commerciale": 5
   }
 }
  
-Sois précis, professionnel et actionnable. Base-toi uniquement sur les observations fournies. IMPORTANT : réponds UNIQUEMENT avec le JSON, sans aucun texte avant ou après, sans markdown, sans explication.`
+Remplace toutes les valeurs par celles issues de tes observations. Sois précis et actionnable.`
  
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 2000,
-      messages: [{ role: "user", content: prompt }]
+      messages: [{ role: 'user', content: prompt }]
     })
  
     const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
-    const cleaned = ('{' + responseText).replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    const cleaned = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     const rapportData = JSON.parse(cleaned)
  
     if (mission_id) {
