@@ -8,7 +8,7 @@ export async function GET() {
   )
 
   const { error } = await supabase
-    .from('operators')
+    .from('clients')
     .select('id')
     .limit(1)
 
