@@ -283,6 +283,7 @@ export default function Terrain() {
   }
 
   const scoreColor = (s: number) => s >= 7 ? '#c8f135' : s >= 5 ? '#EF9F27' : '#E24B4A'
+
   const toggleEnregistrement = async () => {
     if (enregistrement) {
       mediaRecorderRef.current?.stop()
@@ -293,17 +294,24 @@ export default function Terrain() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const recorder = new MediaRecorder(stream)
       audioChunksRef.current = []
-      recorder.ondataavailable = e => audioChunksRef.current.push(e.data)
+      recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data)
       recorder.onstop = async () => {
         stream.getTracks().forEach(t => t.stop())
-        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" })
-        const file = new File([blob], `vocal_${Date.now()}.webm`, { type: "audio/webm" })
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        const file = new File([blob], `vocal_${Date.now()}.webm`, { type: 'audio/webm' })
         setUploadingAudio(true)
-        const path = `${selectedClientId}/${poste.nom.replace(/\s+/g,"_")}_vocal_${Date.now()}.webm`
-        const { error: upErr } = await supabase.storage.from("medias").upload(path, file, { upsert: true })
+        const path = `${selectedClientId}/${sanitize(poste.nom)}_vocal_${Date.now()}.webm`
+        const { error: upErr } = await supabase.storage.from('medias').upload(path, file, { upsert: true })
         if (!upErr) {
-          const { data: urlData } = supabase.storage.from("medias").getPublicUrl(path)
-          const { data: mediaData } = await supabase.from("medias").insert({ client_id: selectedClientId, mission_id: selectedMissionId || null, poste: poste.nom, type: "audio", url: urlData.publicUrl, nom: file.name }).select().single()
+          const { data: urlData } = supabase.storage.from('medias').getPublicUrl(path)
+          const { data: mediaData } = await supabase.from('medias').insert({
+            client_id: selectedClientId,
+            mission_id: selectedMissionId || null,
+            poste: poste.nom,
+            type: 'audio',
+            url: urlData.publicUrl,
+            nom: file.name
+          }).select().single()
           if (mediaData) setMediasParPoste(prev => ({ ...prev, [poste.nom]: [...(prev[poste.nom] || []), mediaData] }))
         }
         setUploadingAudio(false)
@@ -311,7 +319,9 @@ export default function Terrain() {
       mediaRecorderRef.current = recorder
       recorder.start()
       setEnregistrement(true)
-    } catch { setErreur("Micro non accessible") }
+    } catch {
+      setErreur('Micro non accessible')
+    }
   }
 
   const mediasPosteActuel = mediasParPoste[poste?.nom] || []
@@ -502,7 +512,7 @@ export default function Terrain() {
           <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '13px', margin: 0, lineHeight: 1.6 }}>{poste.neuro}</p>
         </div>
 
-        {/* Upload photos/vidéos */}
+        {/* Upload photos/vidéos + vocal */}
         <div style={{ background: 'rgba(55,138,221,0.05)', borderRadius: '12px', padding: '14px', marginBottom: '12px', border: '0.5px solid rgba(55,138,221,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: mediasPosteActuel.length > 0 ? '12px' : '0' }}>
             <p style={{ fontSize: '11px', color: 'rgba(55,138,221,0.9)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
@@ -513,14 +523,19 @@ export default function Terrain() {
                 </span>
               )}
             </p>
-            <div>
+            <div style={{ display: 'flex', gap: '8px' }}>
               <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={handleUploadPoste} style={{ display: 'none' }} />
-              <button onClick={() => fileInputRef.current?.click()} disabled={uploadingPoste}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingPoste}
                 style={{ background: 'rgba(55,138,221,0.15)', border: '1px solid rgba(55,138,221,0.3)', borderRadius: '8px', color: 'rgba(55,138,221,0.9)', fontSize: '12px', fontWeight: '600', padding: '5px 12px', cursor: uploadingPoste ? 'wait' : 'pointer', opacity: uploadingPoste ? 0.6 : 1 }}>
-                {uploadingPoste ? 'Upload...' : '+ Photo / Vidéo'}</button>
-              <button onClick={toggleEnregistrement} disabled={uploadingAudio}
-                style={{ background: enregistrement ? 'rgba(255,59,48,0.2)' : 'rgba(255,149,0,0.15)', border: enregistrement ? '1px solid rgba(255,59,48,0.5)' : '1px solid rgba(255,149,0,0.3)', borderRadius: '8px', color: enregistrement ? 'rgb(255,59,48)' : 'rgba(255,149,0,0.9)', fontSize: '12px', fontWeight: '600', padding: '5px 12px', cursor: 'pointer', marginLeft: '8px' }}>
-                {uploadingAudio ? 'Envoi...' : enregistrement ? '⏹ Stop' : '🎙️ Vocal'}</button
+                {uploadingPoste ? 'Upload...' : '+ Photo / Vidéo'}
+              </button>
+              <button
+                onClick={toggleEnregistrement}
+                disabled={uploadingAudio}
+                style={{ background: enregistrement ? 'rgba(255,59,48,0.2)' : 'rgba(255,149,0,0.15)', border: enregistrement ? '1px solid rgba(255,59,48,0.5)' : '1px solid rgba(255,149,0,0.3)', borderRadius: '8px', color: enregistrement ? 'rgb(255,59,48)' : 'rgba(255,149,0,0.9)', fontSize: '12px', fontWeight: '600', padding: '5px 12px', cursor: 'pointer' }}>
+                {uploadingAudio ? 'Envoi...' : enregistrement ? '⏹ Stop' : '🎙️ Vocal'}
               </button>
             </div>
           </div>
@@ -530,6 +545,8 @@ export default function Terrain() {
                 <div key={m.id} style={{ width: '70px', height: '70px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(55,138,221,0.3)' }}>
                   {m.type === 'photo' ? (
                     <img src={m.url} alt={m.nom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : m.type === 'audio' ? (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,149,0,0.1)', fontSize: '24px' }}>🎙️</div>
                   ) : (
                     <video src={m.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   )}
