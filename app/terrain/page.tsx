@@ -156,6 +156,10 @@ export default function Terrain() {
   const [uploadingPoste, setUploadingPoste] = useState(false)
   const [mediasParPoste, setMediasParPoste] = useState<Record<string, any[]>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+  const [enregistrement, setEnregistrement] = useState(false)
+  const [uploadingAudio, setUploadingAudio] = useState(false)
 
   useEffect(() => {
     supabase.from('clients').select('id, nom').eq('statut', 'actif').then(({ data }) => {
@@ -279,6 +283,37 @@ export default function Terrain() {
   }
 
   const scoreColor = (s: number) => s >= 7 ? '#c8f135' : s >= 5 ? '#EF9F27' : '#E24B4A'
+  const toggleEnregistrement = async () => {
+    if (enregistrement) {
+      mediaRecorderRef.current?.stop()
+      setEnregistrement(false)
+      return
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const recorder = new MediaRecorder(stream)
+      audioChunksRef.current = []
+      recorder.ondataavailable = e => audioChunksRef.current.push(e.data)
+      recorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop())
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" })
+        const file = new File([blob], `vocal_${Date.now()}.webm`, { type: "audio/webm" })
+        setUploadingAudio(true)
+        const path = `${selectedClientId}/${poste.nom.replace(/\s+/g,"_")}_vocal_${Date.now()}.webm`
+        const { error: upErr } = await supabase.storage.from("medias").upload(path, file, { upsert: true })
+        if (!upErr) {
+          const { data: urlData } = supabase.storage.from("medias").getPublicUrl(path)
+          const { data: mediaData } = await supabase.from("medias").insert({ client_id: selectedClientId, mission_id: selectedMissionId || null, poste: poste.nom, type: "audio", url: urlData.publicUrl, nom: file.name }).select().single()
+          if (mediaData) setMediasParPoste(prev => ({ ...prev, [poste.nom]: [...(prev[poste.nom] || []), mediaData] }))
+        }
+        setUploadingAudio(false)
+      }
+      mediaRecorderRef.current = recorder
+      recorder.start()
+      setEnregistrement(true)
+    } catch { setErreur("Micro non accessible") }
+  }
+
   const mediasPosteActuel = mediasParPoste[poste?.nom] || []
 
   // ── SÉLECTION CLIENT ──
@@ -482,7 +517,10 @@ export default function Terrain() {
               <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={handleUploadPoste} style={{ display: 'none' }} />
               <button onClick={() => fileInputRef.current?.click()} disabled={uploadingPoste}
                 style={{ background: 'rgba(55,138,221,0.15)', border: '1px solid rgba(55,138,221,0.3)', borderRadius: '8px', color: 'rgba(55,138,221,0.9)', fontSize: '12px', fontWeight: '600', padding: '5px 12px', cursor: uploadingPoste ? 'wait' : 'pointer', opacity: uploadingPoste ? 0.6 : 1 }}>
-                {uploadingPoste ? 'Upload...' : '+ Photo / Vidéo'}
+                {uploadingPoste ? 'Upload...' : '+ Photo / Vidéo'}</button>
+              <button onClick={toggleEnregistrement} disabled={uploadingAudio}
+                style={{ background: enregistrement ? 'rgba(255,59,48,0.2)' : 'rgba(255,149,0,0.15)', border: enregistrement ? '1px solid rgba(255,59,48,0.5)' : '1px solid rgba(255,149,0,0.3)', borderRadius: '8px', color: enregistrement ? 'rgb(255,59,48)' : 'rgba(255,149,0,0.9)', fontSize: '12px', fontWeight: '600', padding: '5px 12px', cursor: 'pointer', marginLeft: '8px' }}>
+                {uploadingAudio ? 'Envoi...' : enregistrement ? '⏹ Stop' : '🎙️ Vocal'}</button
               </button>
             </div>
           </div>
