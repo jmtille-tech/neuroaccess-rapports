@@ -485,7 +485,8 @@ export default function Terrain() {
           <p style={{ color: '#c8f135', fontSize: '13px', fontWeight: '700', margin: 0 }}>Ben · {selectedClient?.nom}</p>
           <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', margin: 0 }}>{poste.phase}</p>
         </div>
-        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>{posteIndex + 1}/{total}</span>
+       <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>{posteIndex + 1}/{total}</span>
+        <button onClick={() => { if (window.confirm('Quitter le diagnostic ? Tes notes seront perdues.')) window.location.href = '/dashboard' }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '20px', cursor: 'pointer', padding: '4px 8px', marginLeft: '8px' }}>✕</button>
       </div>
 
       <div style={{ height: '3px', background: 'rgba(255,255,255,0.06)' }}>
