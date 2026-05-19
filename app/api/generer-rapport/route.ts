@@ -95,11 +95,11 @@ Sois précis, professionnel et actionnable. Base-toi uniquement sur les observat
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }]
+      messages: [{ role: "user", content: prompt }, { role: "assistant", content: "{" }]
     })
  
     const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
-    const cleaned = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    const cleaned = ('{' + responseText).replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     const rapportData = JSON.parse(cleaned)
  
     if (mission_id) {
