@@ -90,12 +90,12 @@ Le JSON doit avoir exactement cette structure :
   }
 }
  
-Sois précis, professionnel et actionnable. Base-toi uniquement sur les observations fournies.`
+Sois précis, professionnel et actionnable. Base-toi uniquement sur les observations fournies. IMPORTANT : réponds UNIQUEMENT avec le JSON, sans aucun texte avant ou après, sans markdown, sans explication.`
  
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 2000,
-      messages: [{ role: "user", content: prompt }, { role: "assistant", content: "{" }]
+      messages: [{ role: "user", content: prompt }]
     })
  
     const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
