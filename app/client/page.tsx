@@ -34,6 +34,18 @@ const statusColor: any = {
   'en cours': '#EF9F27'
 }
 
+function mediaIcon(type: string) {
+  if (type === 'photo') return '📸'
+  if (type === 'audio') return '🎙️'
+  if (type === 'drone') return '🚁'
+  return '🎥'
+}
+
+function mediaBorder(type: string) {
+  if (type === 'drone') return '1px solid rgba(139,92,246,0.4)'
+  return '1px solid rgba(55,138,221,0.3)'
+}
+
 export default function ClientPage() {
   const [client, setClient] = useState<any>(null)
   const [clientId, setClientId] = useState<string | null>(null)
@@ -338,15 +350,21 @@ export default function ClientPage() {
         {medias.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 0' }}>
             <p style={{ color: t.textMuted, fontSize: '14px', margin: '0 0 8px' }}>Aucun média pour l'instant.</p>
-            <p style={{ color: t.textMuted, fontSize: '12px', margin: 0, opacity: 0.6 }}>Photos, vidéos et notes vocales de vos diagnostics terrain apparaîtront ici.</p>
+            <p style={{ color: t.textMuted, fontSize: '12px', margin: 0, opacity: 0.6 }}>Photos, vidéos, notes vocales et vues drone apparaîtront ici.</p>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
             {medias.map(m => (
-              <div key={m.id} style={{ borderRadius: '10px', overflow: 'hidden', border: `1px solid ${t.border}`, cursor: m.type === 'photo' ? 'zoom-in' : 'default', position: 'relative' }}
-                onClick={() => m.type === 'photo' && setLightbox(m.url)}>
+              <div key={m.id}
+                style={{ borderRadius: '10px', overflow: 'hidden', border: mediaBorder(m.type), cursor: (m.type === 'photo' || m.type === 'drone') ? 'zoom-in' : 'default', position: 'relative' }}
+                onClick={() => (m.type === 'photo' || m.type === 'drone') && setLightbox(m.url)}>
                 {m.type === 'photo' ? (
                   <img src={m.url} alt={m.nom} style={{ width: '100%', height: '120px', objectFit: 'cover', display: 'block' }} />
+                ) : m.type === 'drone' ? (
+                  <div style={{ position: 'relative' }}>
+                    <img src={m.url} alt={m.nom} style={{ width: '100%', height: '120px', objectFit: 'cover', display: 'block' }} />
+                    <div style={{ position: 'absolute', top: '6px', left: '6px', background: 'rgba(139,92,246,0.8)', borderRadius: '4px', padding: '2px 6px', fontSize: '10px', color: '#fff', fontWeight: '600' }}>🚁 DRONE</div>
+                  </div>
                 ) : m.type === 'audio' ? (
                   <div style={{ width: '100%', height: '120px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,149,0,0.08)', gap: '10px' }}>
                     <span style={{ fontSize: '32px' }}>🎙️</span>
@@ -359,7 +377,7 @@ export default function ClientPage() {
                   <p style={{ color: t.textMuted, fontSize: '11px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.poste || m.nom}</p>
                 </div>
                 <span style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', borderRadius: '4px', padding: '2px 6px', fontSize: '10px', color: '#fff' }}>
-                  {m.type === 'photo' ? '📸' : m.type === 'audio' ? '🎙️' : '🎥'}
+                  {mediaIcon(m.type)}
                 </span>
               </div>
             ))}
