@@ -154,8 +154,10 @@ export default function Terrain() {
   const [rapport, setRapport] = useState<any>(null)
   const [erreur, setErreur] = useState('')
   const [uploadingPoste, setUploadingPoste] = useState(false)
+  const [uploadingDrone, setUploadingDrone] = useState(false)
   const [mediasParPoste, setMediasParPoste] = useState<Record<string, any[]>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const droneInputRef = useRef<HTMLInputElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const [enregistrement, setEnregistrement] = useState(false)
@@ -183,7 +185,6 @@ export default function Terrain() {
     const files = e.target.files
     if (!files || !selectedClientId) return
     setUploadingPoste(true)
-
     const newMedias: any[] = []
     for (const file of Array.from(files)) {
       try {
@@ -192,19 +193,9 @@ export default function Terrain() {
         const safeFile = sanitize(file.name.replace(/\.[^.]+$/, ''))
         const path = `${selectedClientId}/${Date.now()}_${safePoste}_${safeFile}.${ext}`
         const isVideo = file.type.startsWith('video/')
-
-        const { error: uploadError } = await supabase.storage.from('medias').upload(path, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
-
-        if (uploadError) {
-          console.error('Upload error:', uploadError)
-          continue
-        }
-
+        const { error: uploadError } = await supabase.storage.from('medias').upload(path, file, { cacheControl: '3600', upsert: false })
+        if (uploadError) { console.error('Upload error:', uploadError); continue }
         const { data: urlData } = supabase.storage.from('medias').getPublicUrl(path)
-
         const { data: mediaData, error: insertError } = await supabase.from('medias').insert({
           client_id: selectedClientId,
           mission_id: selectedMissionId || null,
@@ -213,25 +204,44 @@ export default function Terrain() {
           nom: file.name,
           poste: poste.nom,
         }).select().single()
-
-        if (insertError) {
-          console.error('Insert error:', insertError)
-          continue
-        }
-
+        if (insertError) { console.error('Insert error:', insertError); continue }
         if (mediaData) newMedias.push(mediaData)
-      } catch (err) {
-        console.error('Error processing file:', err)
-      }
+      } catch (err) { console.error('Error processing file:', err) }
     }
-
-    setMediasParPoste(prev => ({
-      ...prev,
-      [poste.nom]: [...(prev[poste.nom] || []), ...newMedias]
-    }))
-
+    setMediasParPoste(prev => ({ ...prev, [poste.nom]: [...(prev[poste.nom] || []), ...newMedias] }))
     setUploadingPoste(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  async function handleUploadDrone(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files
+    if (!files || !selectedClientId) return
+    setUploadingDrone(true)
+    const newMedias: any[] = []
+    for (const file of Array.from(files)) {
+      try {
+        const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+        const safePoste = sanitize(poste.nom)
+        const safeFile = sanitize(file.name.replace(/\.[^.]+$/, ''))
+        const path = `${selectedClientId}/${Date.now()}_drone_${safePoste}_${safeFile}.${ext}`
+        const { error: uploadError } = await supabase.storage.from('medias').upload(path, file, { cacheControl: '3600', upsert: false })
+        if (uploadError) { console.error('Upload error:', uploadError); continue }
+        const { data: urlData } = supabase.storage.from('medias').getPublicUrl(path)
+        const { data: mediaData, error: insertError } = await supabase.from('medias').insert({
+          client_id: selectedClientId,
+          mission_id: selectedMissionId || null,
+          type: 'drone',
+          url: urlData.publicUrl,
+          nom: file.name,
+          poste: poste.nom,
+        }).select().single()
+        if (insertError) { console.error('Insert error:', insertError); continue }
+        if (mediaData) newMedias.push(mediaData)
+      } catch (err) { console.error('Error processing file:', err) }
+    }
+    setMediasParPoste(prev => ({ ...prev, [poste.nom]: [...(prev[poste.nom] || []), ...newMedias] }))
+    setUploadingDrone(false)
+    if (droneInputRef.current) droneInputRef.current.value = ''
   }
 
   function sauvegarderEtContinuer() {
@@ -346,7 +356,6 @@ export default function Terrain() {
             <option key={c.id} value={c.id} style={{ background: '#1a2540' }}>{c.nom}</option>
           ))}
         </select>
-
         {selectedClientId && (
           <>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 8px' }}>Mission (optionnel)</p>
@@ -359,7 +368,6 @@ export default function Terrain() {
             </select>
           </>
         )}
-
         <button onClick={() => selectedClientId && setEtape('intro')} disabled={!selectedClientId}
           style={{ width: '100%', background: selectedClientId ? '#c8f135' : 'rgba(255,255,255,0.1)', color: selectedClientId ? '#0d1520' : 'rgba(255,255,255,0.3)', border: 'none', borderRadius: '12px', padding: '14px 32px', fontSize: '15px', fontWeight: '700', cursor: selectedClientId ? 'pointer' : 'not-allowed' }}>
           Continuer →
@@ -485,7 +493,7 @@ export default function Terrain() {
           <p style={{ color: '#c8f135', fontSize: '13px', fontWeight: '700', margin: 0 }}>Ben · {selectedClient?.nom}</p>
           <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', margin: 0 }}>{poste.phase}</p>
         </div>
-       <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>{posteIndex + 1}/{total}</span>
+        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>{posteIndex + 1}/{total}</span>
         <button onClick={() => { if (window.confirm('Quitter le diagnostic ? Tes notes seront perdues.')) window.location.href = '/dashboard' }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '20px', cursor: 'pointer', padding: '4px 8px', marginLeft: '8px' }}>✕</button>
       </div>
 
@@ -514,7 +522,7 @@ export default function Terrain() {
           <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '13px', margin: 0, lineHeight: 1.6 }}>{poste.neuro}</p>
         </div>
 
-        {/* Upload photos/vidéos + vocal */}
+        {/* Upload photos/vidéos + vocal + drone */}
         <div style={{ background: 'rgba(55,138,221,0.05)', borderRadius: '12px', padding: '14px', marginBottom: '12px', border: '0.5px solid rgba(55,138,221,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: mediasPosteActuel.length > 0 ? '12px' : '0' }}>
             <p style={{ fontSize: '11px', color: 'rgba(55,138,221,0.9)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
@@ -525,32 +533,44 @@ export default function Terrain() {
                 </span>
               )}
             </p>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={handleUploadPoste} style={{ display: 'none' }} />
+              <input ref={droneInputRef} type="file" accept="image/*,video/*" multiple onChange={handleUploadDrone} style={{ display: 'none' }} />
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingPoste}
-                style={{ background: 'rgba(55,138,221,0.15)', border: '1px solid rgba(55,138,221,0.3)', borderRadius: '8px', color: 'rgba(55,138,221,0.9)', fontSize: '12px', fontWeight: '600', padding: '5px 12px', cursor: uploadingPoste ? 'wait' : 'pointer', opacity: uploadingPoste ? 0.6 : 1 }}>
+                style={{ background: 'rgba(55,138,221,0.15)', border: '1px solid rgba(55,138,221,0.3)', borderRadius: '8px', color: 'rgba(55,138,221,0.9)', fontSize: '12px', fontWeight: '600', padding: '5px 10px', cursor: uploadingPoste ? 'wait' : 'pointer', opacity: uploadingPoste ? 0.6 : 1 }}>
                 {uploadingPoste ? 'Upload...' : '+ Photo / Vidéo'}
               </button>
               <button
                 onClick={toggleEnregistrement}
                 disabled={uploadingAudio}
-                style={{ background: enregistrement ? 'rgba(255,59,48,0.2)' : 'rgba(255,149,0,0.15)', border: enregistrement ? '1px solid rgba(255,59,48,0.5)' : '1px solid rgba(255,149,0,0.3)', borderRadius: '8px', color: enregistrement ? 'rgb(255,59,48)' : 'rgba(255,149,0,0.9)', fontSize: '12px', fontWeight: '600', padding: '5px 12px', cursor: 'pointer' }}>
+                style={{ background: enregistrement ? 'rgba(255,59,48,0.2)' : 'rgba(255,149,0,0.15)', border: enregistrement ? '1px solid rgba(255,59,48,0.5)' : '1px solid rgba(255,149,0,0.3)', borderRadius: '8px', color: enregistrement ? 'rgb(255,59,48)' : 'rgba(255,149,0,0.9)', fontSize: '12px', fontWeight: '600', padding: '5px 10px', cursor: 'pointer' }}>
                 {uploadingAudio ? 'Envoi...' : enregistrement ? '⏹ Stop' : '🎙️ Vocal'}
+              </button>
+              <button
+                onClick={() => droneInputRef.current?.click()}
+                disabled={uploadingDrone}
+                style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '8px', color: 'rgba(139,92,246,0.9)', fontSize: '12px', fontWeight: '600', padding: '5px 10px', cursor: uploadingDrone ? 'wait' : 'pointer', opacity: uploadingDrone ? 0.6 : 1 }}>
+                {uploadingDrone ? 'Upload...' : '🚁 Drone'}
               </button>
             </div>
           </div>
           {mediasPosteActuel.length > 0 && (
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {mediasPosteActuel.map(m => (
-                <div key={m.id} style={{ width: '70px', height: '70px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(55,138,221,0.3)' }}>
+                <div key={m.id} style={{ width: '70px', height: '70px', borderRadius: '8px', overflow: 'hidden', border: `1px solid ${m.type === 'drone' ? 'rgba(139,92,246,0.4)' : 'rgba(55,138,221,0.3)'}` }}>
                   {m.type === 'photo' ? (
                     <img src={m.url} alt={m.nom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : m.type === 'audio' ? (
                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,149,0,0.1)', fontSize: '24px' }}>🎙️</div>
+                  ) : m.type === 'drone' ? (
+                    <img src={m.url} alt={m.nom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <video src={m.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  )}
+                  {m.type === 'drone' && (
+                    <div style={{ position: 'absolute', bottom: '2px', right: '2px', fontSize: '10px' }}>🚁</div>
                   )}
                 </div>
               ))}
