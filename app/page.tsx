@@ -20,7 +20,6 @@ export default function Home() {
       return
     }
 
-    // Vérifier le rôle dans user_profiles
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('role')
@@ -55,7 +54,7 @@ export default function Home() {
         textAlign: 'center'
       }}>
         <h1 style={{ color: '#c8f135', fontSize: '24px', margin: '0 0 8px' }}>
-          NeuroAccess
+          NeuroBoard
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', margin: '0 0 32px' }}>
           Plateforme de rapports
