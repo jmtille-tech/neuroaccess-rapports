@@ -100,7 +100,6 @@ export default function Dashboard() {
   const offreColor: any = {
     neuroaccess: '#c8f135',
     neurotaste: '#EF9F27',
-    neuroimpact: '#7C83FD',
     neuroaqua: '#60A5FA',
     neuromedia: '#F472B6',
   }

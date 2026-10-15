@@ -114,12 +114,6 @@ L'équipe NeuroXperiences`
   const syntheseBg: any = {
     critique: '#fee2e2', quickwin: '#dcfce7', optimisation: '#dbeafe', long_terme: '#f3f4f6'
   }
-  const interpColor: any = {
-    flow: '#16a34a', waouh: '#16a34a', stress_modere: '#d97706', confusion: '#d97706', stress_fort: '#dc2626'
-  }
-  const interpLabel: any = {
-    flow: 'Flow', waouh: 'Waouh', stress_modere: 'Stress modéré', confusion: 'Confusion', stress_fort: 'Stress fort'
-  }
 
   if (!rapport) return (
     <main style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -130,10 +124,7 @@ L'équipe NeuroXperiences`
   const ex = rapport.executive_summary || {}
   const parc = rapport.parcours_scores || {}
   const cog = rapport.analyse_cognitive || {}
-  const ni = rapport.neuro_impact || {}
   const syn = rapport.synthese || []
-  const sn = rapport.score_neuroplay || {}
-  const scoreGlobal = ((sn.accessibilite + sn.fluidite + sn.clarte + sn.plaisir + sn.performance_commerciale) / 5).toFixed(1)
   const dateDoc = new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })
 
   // Logo SVG inline (X mark de Neuroplay)
@@ -334,39 +325,6 @@ L'équipe NeuroXperiences`
             </div>
           </div>
 
-          {/* ─── NEUROIMPACT ─── */}
-          {ni.protocole && (
-            <div className="pdf-block" style={{ background: '#0f172a', borderRadius: '12px', padding: '32px', marginBottom: '24px' }}>
-              <h2 style={{ color: '#a6ff00', fontSize: '16px', fontWeight: '700', margin: '0 0 8px' }}>NeuroImpact</h2>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: '0 0 24px' }}>{ni.protocole}</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-                {[
-                  { title: 'EDA — Réponse électrodermale', data: ni.eda, unit: 'µS', keys: ['moyenne', 'pic_max', 'pic_min', 'zones_stress'], labels: ['Niveau moyen', 'Pic maximal', 'Pic minimal', 'Zones de stress'] },
-                  { title: 'HRV — Variabilité cardiaque', data: ni.hrv, unit: 'ms', keys: ['moyenne', 'minimum', 'maximum', 'zones_flow'], labels: ['HRV moyen', 'HRV minimum', 'HRV maximum', 'Zones de flow'] },
-                ].map(({ title, data, unit, keys, labels }) => (
-                  <div key={title} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '16px' }}>
-                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>{title}</p>
-                    {keys.map((k, i) => (
-                      <div key={k} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{labels[i]}</span>
-                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#fff' }}>{data?.[k]} {k.includes('zone') ? 'détectées' : unit}</span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 12px' }}>Corrélation zones · signaux</p>
-              {(ni.zones || []).map((z: any) => (
-                <div key={z.nom} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: interpColor[z.interpretation], flexShrink: 0 }} />
-                  <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', flex: 1 }}>{z.nom}</span>
-                  <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>EDA {z.eda} µS · HRV {z.hrv} ms</span>
-                  <span style={{ fontSize: '11px', padding: '2px 10px', borderRadius: '20px', background: `${interpColor[z.interpretation]}22`, color: interpColor[z.interpretation], fontWeight: '600' }}>{interpLabel[z.interpretation]}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
           {/* ─── SYNTHÈSE STRATÉGIQUE ─── */}
           <div className="pdf-block" style={{ background: '#fff', borderRadius: '12px', padding: '32px', marginBottom: '24px', border: '1px solid #e2e8f0' }}>
             <h2 style={{ color: '#0f172a', fontSize: '16px', fontWeight: '700', margin: '0 0 24px', paddingBottom: '12px', borderBottom: '2px solid #f1f5f9' }}>Synthèse stratégique</h2>
@@ -382,43 +340,6 @@ L'équipe NeuroXperiences`
               </div>
             ))}
           </div>
-
-          {/* ─── SCORE NEUROPLAY ─── */}
-          <div className="pdf-block" style={{ background: '#fff', borderRadius: '12px', padding: '32px', marginBottom: '32px', border: '1px solid #e2e8f0' }}>
-            <h2 style={{ color: '#0f172a', fontSize: '16px', fontWeight: '700', margin: '0 0 24px', paddingBottom: '12px', borderBottom: '2px solid #f1f5f9' }}>Score NeuroPlay</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginBottom: '24px' }}>
-              {[
-                { label: 'Accessibilité', val: sn.accessibilite },
-                { label: 'Fluidité', val: sn.fluidite },
-                { label: 'Clarté', val: sn.clarte },
-                { label: 'Plaisir', val: sn.plaisir },
-                { label: 'Perf. commerciale', val: sn.performance_commerciale },
-              ].map(({ label, val }) => (
-                <div key={label} style={{ textAlign: 'center', background: '#f8fafc', borderRadius: '10px', padding: '16px', border: '1px solid #e2e8f0' }}>
-                  <p style={{ fontSize: '10px', color: '#64748b', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
-                  <div style={{ height: '48px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', marginBottom: '8px' }}>
-                    <div style={{ width: '28px', background: scoreColor(val), borderRadius: '4px 4px 0 0', height: `${val * 4.8}px` }} />
-                  </div>
-                  <p style={{ fontSize: '24px', fontWeight: '700', color: scoreColor(val), margin: 0 }}>{val}</p>
-                </div>
-              ))}
-            </div>
-            <div style={{ background: '#0f172a', borderRadius: '12px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: '#a6ff00' }} />
-              <div>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '0 0 4px' }}>Score global NeuroPlay</p>
-                <p style={{ fontSize: '48px', fontWeight: '700', color: '#a6ff00', margin: 0, lineHeight: 1 }}>{scoreGlobal}</p>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', margin: '4px 0 0' }}>/ 10 · Neuroplay Xpériences</p>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 4px' }}>Client</p>
-                <p style={{ color: '#fff', fontSize: '14px', fontWeight: '600', margin: '0 0 8px' }}>{mission?.clients?.nom}</p>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 4px' }}>Mission</p>
-                <p style={{ color: '#fff', fontSize: '13px', margin: 0 }}>{mission?.type} · {mission?.date_mission}</p>
-              </div>
-            </div>
-          </div>
-
         </div>
       </main>
 
