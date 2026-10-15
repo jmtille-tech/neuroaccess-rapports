@@ -292,8 +292,6 @@ export default function Terrain() {
     }
   }
 
-  const scoreColor = (s: number) => s >= 7 ? '#c8f135' : s >= 5 ? '#EF9F27' : '#E24B4A'
-
   const toggleEnregistrement = async () => {
     if (enregistrement) {
       mediaRecorderRef.current?.stop()
@@ -454,18 +452,6 @@ export default function Terrain() {
                 <p key={i} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', margin: '0 0 6px', paddingLeft: '8px', borderLeft: '2px solid #c8f135', lineHeight: 1.4 }}>{o}</p>
               ))}
             </div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '10px', padding: '14px', border: '0.5px solid rgba(255,255,255,0.07)', marginBottom: '20px' }}>
-            <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>Score NeuroPlay</p>
-            {Object.entries(rapport.score_neuroplay || {}).map(([key, val]: any) => (
-              <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', textTransform: 'capitalize', minWidth: '140px' }}>{key.replace('_', ' ')}</span>
-                <div style={{ flex: 1, height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px' }}>
-                  <div style={{ width: `${val * 10}%`, height: '4px', background: scoreColor(val), borderRadius: '2px' }} />
-                </div>
-                <span style={{ fontSize: '12px', fontWeight: '500', color: scoreColor(val), minWidth: '24px' }}>{val}</span>
-              </div>
-            ))}
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
             <button onClick={() => { setEtape('selection'); setPosteIndex(0); setNotes({}); setNoteActuelle(''); setRapport(null); setSelectedClientId(''); setSelectedMissionId(''); setMediasParPoste({}) }}

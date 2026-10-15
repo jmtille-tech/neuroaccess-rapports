@@ -63,17 +63,6 @@ Le JSON doit avoir exactement cette structure :
     "doute": ["moment 1", "moment 2", "moment 3"],
     "waouh": ["moment positif 1", "moment positif 2", "moment positif 3"]
   },
-  "neuro_impact": {
-    "protocole": "EDA + HRV — parcours visiteur complet",
-    "eda": {"moyenne": 2.8, "pic_max": 6.8, "pic_min": 1.2, "zones_stress": 3},
-    "hrv": {"moyenne": 42, "minimum": 18, "maximum": 68, "zones_flow": 2},
-    "zones": [
-      {"nom": "Entrée & billetterie", "eda": 4.8, "hrv": 21, "interpretation": "stress_modere"},
-      {"nom": "Zone principale", "eda": 2.1, "hrv": 45, "interpretation": "flow"},
-      {"nom": "F&B", "eda": 6.8, "hrv": 18, "interpretation": "stress_fort"},
-      {"nom": "Sortie", "eda": 2.9, "hrv": 24, "interpretation": "flow"}
-    ]
-  },
   "synthese": [
     {"type": "critique", "texte": "action critique 1", "poste": "poste", "delai": "délai"},
     {"type": "critique", "texte": "action critique 2", "poste": "poste", "delai": "délai"},
@@ -81,14 +70,7 @@ Le JSON doit avoir exactement cette structure :
     {"type": "quickwin", "texte": "quick win 2", "poste": "poste", "delai": "délai"},
     {"type": "optimisation", "texte": "optimisation", "poste": "poste", "delai": "délai"},
     {"type": "long_terme", "texte": "action long terme", "poste": "poste", "delai": "délai"}
-  ],
-  "score_neuroplay": {
-    "accessibilite": 7,
-    "fluidite": 6,
-    "clarte": 7,
-    "plaisir": 6,
-    "performance_commerciale": 5
-  }
+  ]
 }
  
 Remplace toutes les valeurs par celles issues de tes observations. Sois précis et actionnable.`
@@ -118,9 +100,7 @@ Remplace toutes les valeurs par celles issues de tes observations. Sois précis 
             executive_summary: rapportData.executive_summary,
             parcours_scores: rapportData.parcours_scores,
             analyse_cognitive: rapportData.analyse_cognitive,
-            neuro_impact: rapportData.neuro_impact,
             synthese: rapportData.synthese,
-            score_neuroplay: rapportData.score_neuroplay,
             statut: 'publie',
             share_token
           })
@@ -133,9 +113,7 @@ Remplace toutes les valeurs par celles issues de tes observations. Sois précis 
             executive_summary: rapportData.executive_summary,
             parcours_scores: rapportData.parcours_scores,
             analyse_cognitive: rapportData.analyse_cognitive,
-            neuro_impact: rapportData.neuro_impact,
             synthese: rapportData.synthese,
-            score_neuroplay: rapportData.score_neuroplay,
             statut: 'publie',
             share_token: generateShareToken()
           })

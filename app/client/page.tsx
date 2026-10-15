@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabase'
 
 const OFFRES = [
   { key: 'neuroaccess', label: 'NeuroAccess', color: '#c8f135', icon: '', desc: 'Diagnostic & parcours visiteur' },
-  { key: 'neuroimpact', label: 'NeuroImpact', color: '#7C83FD', icon: '', desc: 'Mesure physiologique EDA/HRV' },
   { key: 'neurotaste', label: 'NeuroTaste', color: '#EF9F27', icon: '', desc: 'Expérience F&B & sensorielle' },
   { key: 'neuroaqua', label: 'NeuroAqua', color: '#60A5FA', icon: '', desc: 'Expérience aquatique & bien-être' },
   { key: 'neuromedia', label: 'NeuroMédia', color: '#F472B6', icon: '', desc: 'Contenu & communication' },
@@ -24,7 +23,7 @@ const PRESTATIONS = [
   {
     section: '📊 Rapport',
     color: '#c8f135',
-    items: ['Executive summary', 'Parcours client', 'Analyse cognitive', 'Synthèse stratégique', 'Score NeuroPlay']
+    items: ['Executive summary', 'Parcours client', 'Analyse cognitive', 'Synthèse stratégique']
   },
 ]
 
